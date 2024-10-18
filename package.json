@@ -15,7 +15,10 @@
     "vite-plugin-solid": "^2.8.2"
   },
   "dependencies": {
+    "@firebase/database": "^1.0.8",
+    "@firebase/firestore": "^4.7.3",
     "@supabase/supabase-js": "^2.45.4",
+    "firebase": "^10.14.1",
     "solid-js": "^1.8.11"
   }
 }

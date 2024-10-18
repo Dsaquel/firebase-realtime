@@ -1,32 +1,31 @@
-import { createClient } from "@supabase/supabase-js";
-import { For } from "solid-js";
-import { useWatcher, supaConnector } from "./watcher";
-
-const client = createClient(
-  import.meta.env.VITE_SUPA_PROJECT,
-  import.meta.env.VITE_SUPA_ANON
-);
-const query = async () => {
-  return (await client.from("countries").select().like("name", "C%")).data!;
-};
+import {  query } from "@firebase/database";
+import { getFirestore, collection, onSnapshot } from "@firebase/firestore";
+import { firebaseApp } from "../config";
 
 function App() {
-  const { store } = useWatcher(
-    client,
-    [
-      "countries",
-      ["countries_start_C", "countries", query],
-    ],
-    supaConnector
-  );
+  const db = getFirestore(firebaseApp);
+
+  const q = query(collection(db, "users"));
+  onSnapshot(q, (snapshot) => {
+    snapshot.docChanges().forEach((change) => {
+      console.log(change)
+      console.log(change.type)
+      if (change.type === "added") {
+          console.log("New city: ", change.doc.data());
+      }
+      if (change.type === "modified") {
+          console.log("Modified city: ", change.doc.data());
+      }
+      if (change.type === "removed") {
+          console.log("Removed city: ", change.doc.data());
+      }
+    });
+  });
+
+
   return (
     <ul>
-      All countries:
-      <For each={store.countries}>{(country) => <li>{country.name}</li>}</For>
-      Countries with a C:
-      <For each={store.countries_start_C}>
-        {(country) => <li>{country.name}</li>}
-      </For>
+      {/* <For each={store.countries}>{(country) => <li>{country.name}</li>}</For> */}
     </ul>
   );
 }
