@@ -1,32 +1,38 @@
-import {  query } from "@firebase/database";
-import { getFirestore, collection, onSnapshot } from "@firebase/firestore";
+import {
+  collection,
+  getFirestore,
+  onSnapshot,
+  query,
+  where,
+} from "@firebase/firestore";
 import { firebaseApp } from "../config";
+import { firebaseConnector, useWatcher } from "./watcher";
+import { For } from "solid-js";
 
 function App() {
   const db = getFirestore(firebaseApp);
-
-  const q = query(collection(db, "users"));
-  onSnapshot(q, (snapshot) => {
-    snapshot.docChanges().forEach((change) => {
-      console.log(change)
-      console.log(change.type)
-      if (change.type === "added") {
-          console.log("New city: ", change.doc.data());
-      }
-      if (change.type === "modified") {
-          console.log("Modified city: ", change.doc.data());
-      }
-      if (change.type === "removed") {
-          console.log("Removed city: ", change.doc.data());
-      }
-    });
-  });
-
+  const q = query(collection(db, "countries"), where("name", "==", "rance"));
+  const { store } = useWatcher(
+    db,
+    ["countries", ["countries_where", "countries", q]],
+    firebaseConnector
+  );
 
   return (
-    <ul>
-      {/* <For each={store.countries}>{(country) => <li>{country.name}</li>}</For> */}
-    </ul>
+    <div>
+      <h1>countries</h1>
+      <ul>
+        <For each={store.countries?.map((s) => s.data())}>
+          {(country) => <li>{country.name}</li>}
+        </For>
+      </ul>
+      <h1>countries_where</h1>
+      <ul>
+        <For each={store.countries_where?.map((s) => s.data())}>
+          {(country) => <li>{country.name}</li>}
+        </For>
+      </ul>
+    </div>
   );
 }
 
